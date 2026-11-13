@@ -65,11 +65,8 @@
     <!--end::OverlayScrollbars Configure-->
 
     <!--begin::Color Mode Toggle-->
-    <!-- The light/dark/auto switcher ships in adminlte.js as the ColorMode
-     module (since 4.1) — no page script needed. Only the no-flash snippet
-     in <head> stays inline, because it must run before first paint. -->
+    @stack('script')
     <!--end::Color Mode Toggle-->
-
     <!--end::Script-->
   </body>
   <!--end::Body-->
