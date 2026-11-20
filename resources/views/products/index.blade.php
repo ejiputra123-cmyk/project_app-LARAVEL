@@ -5,6 +5,10 @@
         crossorigin="anonymous">
 @endpush
 
+@section('modal')
+    @include('products.modal')
+@endsection
+
 @section('content')
     <!--begin::App Content Header-->
     <div class="app-content-header">
@@ -33,6 +37,30 @@
     <div class="app-content">
         <!--begin::Container-->
         <div class="container-fluid">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            <!-- Form Hapus Produk -->
+            <form id="deleteProductForm" method="POST" class="d-none">
+                @csrf
+                @method('DELETE')
+            </form>
+
             <!--begin::Row-->
             <div class="row">
                 <div class="col-12">
@@ -40,6 +68,14 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Data Produk</h3>
+
+                            <br>
+                            <!-- Tombol Modal Create Product -->
+                            <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal"
+                                data-bs-target="#createProductModal">
+                                <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>
+                                PRODUCT
+                            </button>
 
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse"
@@ -98,12 +134,30 @@
     <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist/js/tabulator.min.js" crossorigin="anonymous">
     </script>
     <script>
-        // Fungsi Hapus Sementara (Tinggal Anda sesuaikan dengan logic AJAX/Form ke controller)
+        // Fungsi Hapus Produk
         function deleteProduct(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-                console.log('Menjalankan proses hapus untuk produk dengan ID:', id);
-                // Nanti Anda bisa gunakan fetch/axios ke endpoint destroy produk di sini
+            if (confirm('Yakin ingin menghapus produk ini?')) {
+                const form = document.getElementById('deleteProductForm');
+                form.action = `/products/${id}`;
+                form.submit();
             }
+        }
+
+        // Fungsi Edit (Menampilkan Modal dan Mengisi Form)
+        function editProduct(encodedData) {
+            const product = JSON.parse(decodeURIComponent(encodedData));
+
+            // Isi nilai form modal
+            document.getElementById('edit_name').value = product.name;
+            document.getElementById('edit_price').value = product.price;
+            document.getElementById('edit_stock').value = product.stock;
+            document.getElementById('edit_description').value = product.description || '';
+
+            // Ubah action form ke endpoint update yang sesuai dengan id produk
+            document.getElementById('editProductForm').action = `/products/${product.id}`;
+
+            // Tampilkan modal edit
+            new bootstrap.Modal(document.getElementById('editProductModal')).show();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -120,38 +174,47 @@
                         title: 'ID',
                         field: 'id',
                         width: 80,
-                        headerSort: true,
+                        headerSort: true
+                    },
+                    {
+                        title: 'Image',
+                        field: 'image',
+                        formatter: 'image',
+                        formatterParams: {
+                            height: '50px',
+                            width: '50px',
+                            urlPrefix: '/storage/',
+                        },
+                        width: 100,
+                        hozAlign: 'center',
                     },
                     {
                         title: 'Product Name',
-                        field: 'name',
+                        field: 'name'
                     },
                     {
                         title: 'Price',
-                        field: 'price',
+                        field: 'price'
                     },
                     {
                         title: 'Stock',
                         field: 'stock',
-                        width: 120,
+                        width: 120
                     },
                     {
                         title: 'Aksi',
                         field: 'id',
-                        formatter: function(cell) {
-                            var id = cell.getValue();
-                            var editUrl = "{{ url('products') }}/" + id + "/edit";
-
-                            // membuat tombol edit dan delete manual di dalam tabulator
-                            return `
-                            <a href="${editUrl}" class="btn btn-sm btn-success">Edit</a>
-                            <button onclick="deleteProduct(${id})" class="btn btn-sm btn-danger">Hapus</button>`;
-                        },
                         headerSort: false,
-                        borderless: true,
-                        width: 200,
                         hozAlign: 'center',
-                    },
+                        formatter: (cell) => {
+                            const rowData = cell.getRow().getData();
+                            // Konversi objek row data ke string dan encode agar aman disisipkan ke attribut HTML
+                            const dataStr = encodeURIComponent(JSON.stringify(rowData));
+                            return `
+                            <button onclick="editProduct('${dataStr}')" class="btn btn-sm btn-success">Edit</button>
+                            <button onclick="deleteProduct(${rowData.id})" class="btn btn-sm btn-danger">Hapus</button>`;
+                        }
+                    }
                 ],
             });
 
@@ -163,34 +226,19 @@
             });
 
             table.on('renderComplete', () => {
-                document.querySelectorAll('#table-pagination button').forEach((button) => {
-                    button.classList.add('btn', 'btn-sm', 'btn-outline-secondary');
-                });
+                document.querySelectorAll('#table-pagination button').forEach(btn => btn.classList.add(
+                    'btn', 'btn-sm', 'btn-outline-secondary'));
             });
 
             document.getElementById('table-filter').addEventListener('input', (e) => {
-                const value = e.target.value;
-                if (value) {
-                    table.setFilter(
-                        [{
-                            field: 'name',
-                            type: 'like',
-                            value: value
-                        }]);
-                } else {
-                    table.clearFilter();
-                }
+                e.target.value ? table.setFilter('name', 'like', e.target.value) : table.clearFilter();
             });
 
-            document
-                .getElementById('export-csv')
-                .addEventListener('click', () => table.download('csv', 'products.csv'));
-            document
-                .getElementById('export-json')
-                .addEventListener('click', () => table.download('json', 'products.json'));
-            document
-                .getElementById('print-table')
-                .addEventListener('click', () => table.print(false, true));
+            document.getElementById('export-csv').addEventListener('click', () => table.download('csv',
+                'products.csv'));
+            document.getElementById('export-json').addEventListener('click', () => table.download('json',
+                'products.json'));
+            document.getElementById('print-table').addEventListener('click', () => table.print(false, true));
         });
     </script>
 @endpush

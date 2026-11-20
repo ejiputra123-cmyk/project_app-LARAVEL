@@ -14,6 +14,7 @@
       <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+    @yield('modal')
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
     <script
@@ -31,7 +32,7 @@
       crossorigin="anonymous"
     ></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="assets/js/adminlte.js"></script>
+    <script src="{{ asset('assets/js/adminlte.js') }}"></script>
     <!--end::Required Plugin(AdminLTE)-->
     <!--begin::OverlayScrollbars Configure-->
     <script>
