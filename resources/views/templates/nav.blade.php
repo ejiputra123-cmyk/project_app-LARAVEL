@@ -222,6 +222,9 @@
         <div class="sidebar-wrapper">
           <nav class="mt-2" aria-label="Main navigation">
             <!--begin::Sidebar Menu-->
+            @php
+              $isMasterData = request()->routeIs('members.*', 'categories.*', 'products.*', 'users.*');
+            @endphp
             <ul
               class="nav sidebar-menu flex-column"
               data-lte-toggle="treeview"
@@ -235,8 +238,9 @@
                     Dashboard
                   </p>
                 </a>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
+              </li>
+              <li class="nav-item {{ $isMasterData ? 'menu-open' : '' }}" data-menu-id="master-data">
+                <a href="#" class="nav-link {{ $isMasterData ? 'active' : '' }}">
                   <i class="nav-icon bi bi-box-seam-fill"></i>
                   <p>
                     Master Data
@@ -245,32 +249,32 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="./widgets/small-box.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('members.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Member</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./widgets/info-box.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('categories.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Categories</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('products.index') }}" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('products.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Products</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('users.index') }}" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('users.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>User</p>
                     </a>
                   </li>
                 </ul>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" data-menu-id="transactions">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-shop"></i>
                   <p>
@@ -293,7 +297,7 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" data-menu-id="reports">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-clipboard"></i>
                   <p>
@@ -319,8 +323,10 @@
                       <i class="nav-icon bi bi-circle"></i>
                       <p>Members</p>
                     </a>
+                  </li>
                 </ul>
               </li>
+            </ul>
             <!--end::Sidebar Menu-->
 
             <!-- Docs CTA (bottom of sidebar) -->

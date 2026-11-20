@@ -65,6 +65,58 @@
     </script>
     <!--end::OverlayScrollbars Configure-->
 
+    <!--begin::Sidebar Dropdown State Persistence-->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const STORAGE_KEY = 'ziemarket-open-menus';
+        let openMenus = [];
+        try {
+          openMenus = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        } catch {
+          openMenus = [];
+        }
+
+        // Pulihkan dropdown yang sebelumnya dibuka
+        document.querySelectorAll('#navigation > li[data-menu-id]').forEach((item) => {
+          const id = item.getAttribute('data-menu-id');
+          if (openMenus.includes(id) && !item.classList.contains('menu-open')) {
+            item.classList.add('menu-open');
+          }
+
+          // Simpan perubahan status saat dropdown diklik
+          const trigger = item.querySelector(':scope > a.nav-link');
+          if (trigger) {
+            trigger.addEventListener('click', () => {
+              setTimeout(() => {
+                const currentOpen = Array.from(
+                  document.querySelectorAll('#navigation > li[data-menu-id].menu-open')
+                ).map((el) => el.getAttribute('data-menu-id'));
+                try {
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(currentOpen));
+                } catch {}
+              }, 50);
+            });
+          }
+        });
+      });
+    </script>
+    <!--end::Sidebar Dropdown State Persistence-->
+
+    <!--begin::SweetAlert2-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if (session('success'))
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          Swal.fire({
+            title: "Success!",
+            text: @json(session('success')),
+            icon: "success"
+          });
+        });
+      </script>
+    @endif
+    <!--end::SweetAlert2-->
+
     <!--begin::Color Mode Toggle-->
     @stack('script')
     <!--end::Color Mode Toggle-->

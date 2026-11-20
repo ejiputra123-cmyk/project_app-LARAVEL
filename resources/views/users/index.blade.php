@@ -136,11 +136,21 @@
     </script>
     <script>
         function deleteUser(id) {
-            if (confirm('Yakin ingin menghapus user ini?')) {
-                const form = document.getElementById('deleteUserForm');
-                form.action = `/users/${id}`;
-                form.submit();
-            }
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('deleteUserForm');
+                    form.action = `/users/${id}`;
+                    form.submit();
+                }
+            });
         }
 
         function editUser(encodedData) {

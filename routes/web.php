@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +23,12 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::resource('members', MemberController::class);
+    Route::get('api/members', [MemberController::class, 'apiData'])->name('members.api');
+
+    Route::resource('categories', CategoryController::class);
+    Route::get('api/categories', [CategoryController::class, 'apiData'])->name('categories.api');
 
     Route::resource('products', ProductController::class);
     Route::get('api/products', [ProductController::class, 'apiData'])->name('products.api');
