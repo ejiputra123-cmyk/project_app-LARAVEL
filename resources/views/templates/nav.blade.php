@@ -128,9 +128,9 @@
                 <img
                   src="{{ asset('assets/assets/img/user2-160x160.jpg') }}"
                   class="user-image rounded-circle shadow"
-                  alt="Alexander Pierce"
+                  alt="{{ Auth::user()->name ?? 'User' }}"
                 />
-                <span class="d-none d-xl-inline">Alexander Pierce</span>
+                <span class="d-none d-xl-inline">{{ Auth::user()->name ?? 'User' }}</span>
               </a>
               <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                 <!--begin::User Image-->
@@ -138,11 +138,11 @@
                   <img
                     src="{{ asset('assets/assets/img/user2-160x160.jpg') }}"
                     class="rounded-circle shadow"
-                    alt="Alexander Pierce"
+                    alt="{{ Auth::user()->name ?? 'User' }}"
                   />
                   <p>
-                    Alexander Pierce - Web Developer
-                    <small>Member since Nov. 2023</small>
+                    {{ Auth::user()->name ?? 'User' }}
+                    <small>{{ Auth::user()->email ?? '' }}</small>
                   </p>
                 </li>
                 <!--end::User Image-->
@@ -166,7 +166,10 @@
                 <!--begin::Menu Footer-->
                 <li class="user-footer">
                   <a href="#" class="btn btn-outline-secondary">Profile</a>
-                  <a href="#" class="btn btn-outline-danger float-end">Sign out</a>
+                  <form action="{{ route('logout') }}" method="POST" class="d-inline float-end">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-danger">Sign out</button>
+                  </form>
                 </li>
                 <!--end::Menu Footer-->
               </ul>
@@ -254,13 +257,13 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ url('products') }}" class="nav-link">
+                    <a href="{{ route('products.index') }}" class="nav-link">
                       <i class="nav-icon bi bi-circle"></i>
                       <p>Products</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./widgets/social.html" class="nav-link">
+                    <a href="{{ route('users.index') }}" class="nav-link">
                       <i class="nav-icon bi bi-circle"></i>
                       <p>User</p>
                     </a>
@@ -322,13 +325,16 @@
 
             <!-- Docs CTA (bottom of sidebar) -->
             <div class="p-3 mt-3 border-top border-secondary border-opacity-25">
-              <a
-                href="./docs/introduction.html"
-                class="btn btn-sm btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
-              >
-                <i class="bi bi-power" aria-hidden="true"></i>
-                Logout
-              </a>
+              <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
+                >
+                  <i class="bi bi-power" aria-hidden="true"></i>
+                  Logout
+                </button>
+              </form>
             </div>
           </nav>
         </div>

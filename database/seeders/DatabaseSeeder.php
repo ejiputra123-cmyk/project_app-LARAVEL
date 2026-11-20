@@ -12,12 +12,13 @@ class DatabaseSeeder extends Seeder
     // Seed the application's database.
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        User::updateOrCreate(
+            ['email' => 'admin@ziemarket.com'],
+            [
+                'name' => 'Admin ZieMarket',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->call([
             ProductSeeder::class,
