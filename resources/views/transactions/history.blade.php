@@ -349,7 +349,6 @@
                     },
                     {
                         title: 'Aksi',
-                        field: 'id',
                         minWidth: 210,
                         headerSort: false,
                         hozAlign: 'center',

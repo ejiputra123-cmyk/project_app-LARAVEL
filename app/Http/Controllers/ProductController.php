@@ -16,7 +16,7 @@ class ProductController extends Controller
 
     public function apiData()
     {
-        $products = \App\Models\Product::latest()->get();
+        $products = Product::orderBy('id')->get();
         return response()->json($products);
     }
 

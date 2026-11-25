@@ -15,7 +15,7 @@ class CategoryController extends Controller
 
     public function apiData()
     {
-        $categories = Category::latest()->get();
+        $categories = Category::orderBy('id')->get();
 
         return response()->json($categories);
     }

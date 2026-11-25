@@ -18,7 +18,7 @@ class UserController extends Controller
 
     public function apiData()
     {
-        $users = User::latest()->get(['id', 'name', 'email', 'role', 'created_at']);
+        $users = User::orderBy('id')->get(['id', 'name', 'email', 'role', 'created_at']);
 
         return response()->json($users);
     }

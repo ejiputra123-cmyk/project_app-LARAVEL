@@ -176,10 +176,15 @@
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50, 100],
                 movableColumns: true,
+                initialSort: [{
+                    column: 'id',
+                    dir: 'asc'
+                }],
                 columns: [{
                         title: 'ID',
                         field: 'id',
                         width: 80,
+                        sorter: 'number',
                         headerSort: true
                     },
                     {
@@ -203,7 +208,6 @@
                     },
                     {
                         title: 'Aksi',
-                        field: 'id',
                         width: 180,
                         headerSort: false,
                         hozAlign: 'center',

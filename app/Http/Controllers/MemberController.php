@@ -15,7 +15,7 @@ class MemberController extends Controller
 
     public function apiData()
     {
-        $members = Member::latest()->get();
+        $members = Member::orderBy('id')->get();
 
         return response()->json($members);
     }
