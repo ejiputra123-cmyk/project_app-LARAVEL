@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,6 +74,10 @@ class UserController extends Controller
 
         if ($user->id === Auth::id()) {
             return redirect()->route('users.index')->withErrors(['Tidak dapat menghapus akun yang sedang Anda gunakan.']);
+        }
+
+        if (Order::where('user_id', $user->id)->exists()) {
+            return redirect()->route('users.index')->withErrors(['User tidak dapat dihapus karena memiliki riwayat transaksi.']);
         }
 
         $user->delete();

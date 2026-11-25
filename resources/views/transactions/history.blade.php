@@ -2,7 +2,7 @@
 
 @push('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist/css/tabulator_bootstrap5.min.css"
-        crossorigin="anonymous">
+        crossorigin="anonymous" referrerpolicy="no-referrer">
 @endpush
 
 @section('modal')
@@ -62,7 +62,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Riwayat Transaksi</h3>
+                            <h2 class="card-title fs-5">Riwayat Transaksi</h2>
 
                             <br>
                             <a href="{{ route('transactions.order') }}" class="btn btn-primary mt-2">
@@ -100,27 +100,30 @@
                             </div>
 
                             <!-- Baris Filter -->
-                            <div class="row g-2 mb-3">
-                                <div class="col-md-4">
-                                    <input type="text" id="table-filter" class="form-control"
-                                        placeholder="Cari invoice, member, atau kasir...">
+                            <search>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-4">
+                                        <label for="table-filter" class="visually-hidden">Cari invoice, member, atau kasir</label>
+                                        <input type="search" id="table-filter" class="form-control"
+                                            placeholder="Cari invoice, member, atau kasir..." autocomplete="off">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="date" id="filter-date-from" class="form-control" aria-label="Dari tanggal"
+                                            title="Dari tanggal">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="date" id="filter-date-to" class="form-control" aria-label="Sampai tanggal"
+                                            title="Sampai tanggal">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select id="filter-status" class="form-select" aria-label="Filter status">
+                                            <option value="">Semua Status</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="date" id="filter-date-from" class="form-control" aria-label="Dari tanggal"
-                                        title="Dari tanggal">
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="date" id="filter-date-to" class="form-control" aria-label="Sampai tanggal"
-                                        title="Sampai tanggal">
-                                </div>
-                                <div class="col-md-2">
-                                    <select id="filter-status" class="form-select" aria-label="Filter status">
-                                        <option value="">Semua Status</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-                            </div>
+                            </search>
 
                             <!-- Tabel Tabulator -->
                             <div id="transaction-table" aria-label="Transaction History"></div>
@@ -138,134 +141,152 @@
 @endsection
 
 @push('script')
-    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist/js/tabulator.min.js" crossorigin="anonymous">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist/js/tabulator.min.js" crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
     <script>
-        const isAdmin = @json(auth()->user()->can('admin'));
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAdmin = @json(auth()->user()->can('admin'));
 
-        const formatRupiah = (amount) => 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+            const formatRupiah = (amount) => 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
 
-        const formatDateId = (value) => {
-            if (!value) return '-';
-            return new Date(value).toLocaleString('id-ID', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        };
+            const formatDateId = (value) => {
+                if (!value) return '-';
+                return new Date(value).toLocaleString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
 
-        const escapeHtml = (str) => String(str ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+            const escapeHtml = (str) => String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
 
-        const paymentBadge = (method) => {
-            const map = {
+            const createBadge = (label, cls) => {
+                const span = document.createElement('span');
+                span.className = `badge ${cls}`;
+                span.textContent = label;
+                return span;
+            };
+
+            const paymentMeta = (method) => ({
                 cash: ['Cash', 'text-bg-success'],
                 qris: ['QRIS', 'text-bg-info'],
                 transfer: ['Transfer', 'text-bg-primary']
-            };
-            const [label, cls] = map[method] || [escapeHtml(method || '-'), 'text-bg-secondary'];
-            return `<span class="badge ${cls}">${label}</span>`;
-        };
+            }[method] || [method || '-', 'text-bg-secondary']);
 
-        const statusBadge = (status) => {
-            if (status === 'completed') {
-                return '<span class="badge text-bg-success">Completed</span>';
-            }
-            if (status === 'cancelled') {
-                return '<span class="badge text-bg-danger">Cancelled</span>';
-            }
-            return `<span class="badge text-bg-secondary">${escapeHtml(status || '-')}</span>`;
-        };
+            const statusMeta = (status) => ({
+                completed: ['Completed', 'text-bg-success'],
+                cancelled: ['Cancelled', 'text-bg-danger']
+            }[status] || [status || '-', 'text-bg-secondary']);
 
-        async function showDetail(orderId) {
-            const modalEl = document.getElementById('detailTransactionModal');
-            const loadingEl = document.getElementById('detail-loading');
-            const contentEl = document.getElementById('detail-content');
+            async function showDetail(orderId) {
+                try {
+                    const res = await fetch(`/transactions/${orderId}`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!res.ok) throw new Error('Gagal memuat detail transaksi.');
 
-            loadingEl.classList.remove('d-none');
-            contentEl.classList.add('d-none');
+                    const order = await res.json();
 
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.show();
+                    document.getElementById('detail-invoice').textContent = order.invoice_number;
+                    document.getElementById('detail-date').textContent = formatDateId(order.created_at);
+                    document.getElementById('detail-cashier').textContent = order.user?.name || '-';
+                    document.getElementById('detail-member').textContent = order.member
+                        ? `${order.member.member_code} - ${order.member.name}`
+                        : 'Umum';
 
-            try {
-                const res = await fetch(`/transactions/${orderId}`, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                if (!res.ok) throw new Error('Gagal memuat detail transaksi.');
+                    const [payLabel, payCls] = paymentMeta(order.payment_method);
+                    document.getElementById('detail-payment').replaceChildren(createBadge(payLabel, payCls));
 
-                const order = await res.json();
+                    const [stLabel, stCls] = statusMeta(order.status);
+                    document.getElementById('detail-status').replaceChildren(createBadge(stLabel, stCls));
 
-                document.getElementById('detail-invoice').textContent = order.invoice_number;
-                document.getElementById('detail-date').textContent = formatDateId(order.created_at);
-                document.getElementById('detail-cashier').textContent = order.user?.name || '-';
-                document.getElementById('detail-member').textContent = order.member
-                    ? `${order.member.member_code} - ${order.member.name}`
-                    : 'Umum';
-                document.getElementById('detail-payment').innerHTML = paymentBadge(order.payment_method);
-                document.getElementById('detail-status').innerHTML = statusBadge(order.status);
+                    const tbody = document.getElementById('detail-items');
+                    tbody.replaceChildren();
+                    (order.items || []).forEach((item) => {
+                        const tr = document.createElement('tr');
+                        const tdName = document.createElement('td');
+                        tdName.textContent = item.product_name;
 
-                document.getElementById('detail-items').innerHTML = (order.items || []).map((item) => `
-                    <tr>
-                        <td>${escapeHtml(item.product_name)}</td>
-                        <td class="text-end">${formatRupiah(item.price)}</td>
-                        <td class="text-center">${item.quantity}</td>
-                        <td class="text-end">${formatRupiah(item.subtotal)}</td>
-                    </tr>
-                `).join('');
+                        const tdPrice = document.createElement('td');
+                        tdPrice.className = 'text-end';
+                        tdPrice.textContent = formatRupiah(item.price);
 
-                document.getElementById('detail-total').textContent = formatRupiah(order.total_amount);
-                document.getElementById('detail-paid').textContent = formatRupiah(order.paid_amount);
-                document.getElementById('detail-change').textContent = formatRupiah(order.change_amount);
+                        const tdQty = document.createElement('td');
+                        tdQty.className = 'text-center';
+                        tdQty.textContent = String(item.quantity);
 
-                const notesWrapper = document.getElementById('detail-notes-wrapper');
-                if (order.notes) {
-                    document.getElementById('detail-notes').textContent = order.notes;
-                    notesWrapper.classList.remove('d-none');
-                } else {
-                    notesWrapper.classList.add('d-none');
+                        const tdSub = document.createElement('td');
+                        tdSub.className = 'text-end';
+                        tdSub.textContent = formatRupiah(item.subtotal);
+
+                        tr.append(tdName, tdPrice, tdQty, tdSub);
+                        tbody.appendChild(tr);
+                    });
+
+                    document.getElementById('detail-total').textContent = formatRupiah(order.total_amount);
+                    document.getElementById('detail-paid').textContent = formatRupiah(order.paid_amount);
+                    document.getElementById('detail-change').textContent = formatRupiah(order.change_amount);
+
+                    const notesWrapper = document.getElementById('detail-notes-wrapper');
+                    if (order.notes) {
+                        document.getElementById('detail-notes').textContent = order.notes;
+                        notesWrapper.classList.remove('d-none');
+                    } else {
+                        notesWrapper.classList.add('d-none');
+                    }
+
+                    document.getElementById('detail-receipt-link').href = `/transactions/${order.id}/receipt`;
+
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('detailTransactionModal')).show();
+                } catch (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Tidak dapat memuat detail transaksi.'
+                    });
                 }
+            }
 
-                document.getElementById('detail-receipt-link').href = `/transactions/${order.id}/receipt`;
-
-                loadingEl.classList.add('d-none');
-                contentEl.classList.remove('d-none');
-            } catch (err) {
-                modal.hide();
+            function cancelOrder(orderId, invoiceNumber) {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Tidak dapat memuat detail transaksi.'
+                    title: 'Batalkan Transaksi?',
+                    text: `Transaksi ${invoiceNumber} akan dibatalkan dan stok produk akan dikembalikan.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Batalkan!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('cancelOrderForm');
+                        form.action = `/transactions/${orderId}/cancel`;
+                        form.submit();
+                    }
                 });
             }
-        }
 
-        function cancelOrder(orderId, invoiceNumber) {
-            Swal.fire({
-                title: 'Batalkan Transaksi?',
-                text: `Transaksi ${invoiceNumber} akan dibatalkan dan stok produk akan dikembalikan.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Batalkan!',
-                cancelButtonText: 'Tidak'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.getElementById('cancelOrderForm');
-                    form.action = `/transactions/${orderId}/cancel`;
-                    form.submit();
+            const tableEl = document.getElementById('transaction-table');
+
+            // Delegated click handler untuk tombol Detail & Batalkan (tanpa inline onclick).
+            tableEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-action]');
+                if (!btn) return;
+                const id = Number(btn.dataset.id);
+                if (btn.dataset.action === 'detail') {
+                    showDetail(id);
+                } else if (btn.dataset.action === 'cancel') {
+                    cancelOrder(id, btn.dataset.invoice || '');
                 }
             });
-        }
 
-        document.addEventListener('DOMContentLoaded', () => {
             const table = new Tabulator('#transaction-table', {
                 ajaxURL: "{{ route('transactions.api') }}",
                 layout: 'fitColumns',
@@ -304,7 +325,10 @@
                         field: 'payment_method',
                         width: 125,
                         hozAlign: 'center',
-                        formatter: (cell) => paymentBadge(cell.getValue())
+                        formatter: (cell) => {
+                            const [label, cls] = paymentMeta(cell.getValue());
+                            return `<span class="badge ${cls}">${escapeHtml(label)}</span>`;
+                        }
                     },
                     {
                         title: 'Total',
@@ -318,7 +342,10 @@
                         field: 'status',
                         width: 115,
                         hozAlign: 'center',
-                        formatter: (cell) => statusBadge(cell.getValue())
+                        formatter: (cell) => {
+                            const [label, cls] = statusMeta(cell.getValue());
+                            return `<span class="badge ${cls}">${escapeHtml(label)}</span>`;
+                        }
                     },
                     {
                         title: 'Aksi',
@@ -330,13 +357,14 @@
                         print: false,
                         formatter: (cell) => {
                             const row = cell.getRow().getData();
+                            const inv = escapeHtml(row.invoice_number);
                             const cancelBtn = isAdmin && row.status === 'completed'
-                                ? `<button type="button" onclick="cancelOrder(${row.id}, '${escapeHtml(row.invoice_number)}')" class="btn btn-sm btn-danger">Batalkan</button>`
+                                ? `<button type="button" data-action="cancel" data-id="${row.id}" data-invoice="${inv}" aria-label="Batalkan ${inv}" class="btn btn-sm btn-danger">Batalkan</button>`
                                 : '';
                             return `
                                 <div class="d-inline-flex gap-1">
-                                    <button type="button" onclick="showDetail(${row.id})" class="btn btn-sm btn-info text-white">Detail</button>
-                                    <a href="/transactions/${row.id}/receipt" target="_blank" class="btn btn-sm btn-secondary">Struk</a>
+                                    <button type="button" data-action="detail" data-id="${row.id}" aria-label="Detail ${inv}" class="btn btn-sm btn-info text-white">Detail</button>
+                                    <a href="/transactions/${row.id}/receipt" target="_blank" rel="noopener" aria-label="Cetak struk ${inv}" class="btn btn-sm btn-secondary">Struk</a>
                                     ${cancelBtn}
                                 </div>`;
                         }
@@ -345,10 +373,9 @@
             });
 
             table.on('tableBuilt', () => {
-                const grid = document.getElementById('transaction-table');
-                grid.removeAttribute('aria-owns');
-                grid.querySelector('.tabulator-tableHolder').setAttribute('role', 'rowgroup');
-                grid.querySelector('.tabulator-table').setAttribute('role', 'presentation');
+                tableEl.removeAttribute('aria-owns');
+                tableEl.querySelector('.tabulator-tableHolder').setAttribute('role', 'rowgroup');
+                tableEl.querySelector('.tabulator-table').setAttribute('role', 'presentation');
             });
 
             table.on('renderComplete', () => {

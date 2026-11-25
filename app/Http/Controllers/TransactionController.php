@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
@@ -15,7 +16,7 @@ class TransactionController extends Controller
     public function order()
     {
         $products = Product::orderBy('name')->get(['id', 'name', 'price', 'stock', 'image']);
-        $members = Member::orderBy('name')->get(['id', 'member_code', 'name', 'phone']);
+        $members = Member::orderBy('name')->get(['id', 'member_code', 'name']);
 
         return view('transactions.order', compact('products', 'members'));
     }
@@ -79,16 +80,9 @@ class TransactionController extends Controller
                 ]);
             }
 
-            $prefix = 'INV-' . now()->format('Ymd') . '-';
-            $lastInvoice = Order::where('invoice_number', 'like', $prefix . '%')
-                ->lockForUpdate()
-                ->orderByDesc('invoice_number')
-                ->value('invoice_number');
-            $nextNumber = $lastInvoice ? ((int) substr($lastInvoice, strlen($prefix))) + 1 : 1;
-            $invoiceNumber = $prefix . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
-
+            // Pakai placeholder unik lalu set nomor invoice dari auto-increment ID agar bebas race/deadlock.
             $order = Order::create([
-                'invoice_number' => $invoiceNumber,
+                'invoice_number' => 'TMP-' . Str::uuid(),
                 'user_id' => Auth::id(),
                 'member_id' => $validated['member_id'] ?? null,
                 'total_amount' => $totalAmount,
@@ -97,6 +91,10 @@ class TransactionController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'status' => 'completed',
                 'notes' => $validated['notes'] ?? null,
+            ]);
+
+            $order->update([
+                'invoice_number' => 'INV-' . now()->format('Ymd') . '-' . str_pad((string) $order->id, 4, '0', STR_PAD_LEFT),
             ]);
 
             foreach ($preparedItems as $item) {
@@ -114,16 +112,11 @@ class TransactionController extends Controller
             return $order->load(['user:id,name', 'member:id,member_code,name', 'items']);
         });
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Transaksi berhasil diproses.',
-                'order' => $order,
-                'receipt_url' => route('transactions.receipt', $order),
-            ], 201);
-        }
-
-        return redirect()->route('transactions.order')
-            ->with('success', "Transaksi {$order->invoice_number} berhasil diproses.");
+        return response()->json([
+            'message' => 'Transaksi berhasil diproses.',
+            'order' => $order,
+            'receipt_url' => route('transactions.receipt', $order),
+        ], 201);
     }
 
     public function history()
@@ -133,7 +126,7 @@ class TransactionController extends Controller
 
     public function apiData()
     {
-        $orders = Order::with(['user:id,name', 'member:id,member_code,name', 'items'])
+        $orders = Order::with(['user:id,name', 'member:id,member_code,name'])
             ->latest()
             ->get();
 

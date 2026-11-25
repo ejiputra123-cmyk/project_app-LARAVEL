@@ -4,11 +4,31 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+        (() => {
+            'use strict';
+            const root = document.documentElement;
+            let stored = null;
+            try {
+                stored = localStorage.getItem('lte-theme');
+            } catch {}
+            const resolved = (stored === 'dark' || stored === 'light')
+                ? stored
+                : (globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            root.setAttribute('data-bs-theme', resolved);
+            root.style.colorScheme = resolved;
+        })();
+    </script>
     <title>Struk {{ $order->invoice_number }} | ZieMarket</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-        crossorigin="anonymous" />
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset('assets/css/adminlte.css') }}" />
     <style>
+        :root {
+            color-scheme: light dark;
+        }
+
         body {
             background-color: var(--bs-tertiary-bg);
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -29,6 +49,10 @@
         }
 
         @media print {
+            :root {
+                color-scheme: light;
+            }
+
             body {
                 background: #fff !important;
                 color: #000 !important;
@@ -51,9 +75,9 @@
 </head>
 
 <body>
-    <div class="receipt-paper shadow-sm">
+    <main class="receipt-paper shadow-sm">
         <div class="text-center">
-            <h5 class="fw-bold mb-0">ZieMarket</h5>
+            <h1 class="fs-5 fw-bold mb-0">ZieMarket</h1>
             <small class="text-body-secondary">Struk Pembayaran</small>
             @if ($order->status === 'cancelled')
                 <div class="mt-1">
@@ -128,14 +152,19 @@
         </div>
 
         <div class="d-flex gap-2 mt-3 no-print">
-            <button type="button" onclick="window.print()" class="btn btn-primary btn-sm w-100">
+            <button type="button" id="btn-print-receipt" class="btn btn-primary btn-sm w-100">
                 <i class="bi bi-printer me-1" aria-hidden="true"></i>Cetak Struk
             </button>
-            <button type="button" onclick="window.close()" class="btn btn-outline-secondary btn-sm">
+            <button type="button" id="btn-close-receipt" class="btn btn-outline-secondary btn-sm">
                 Tutup
             </button>
         </div>
-    </div>
+    </main>
+
+    <script>
+        document.getElementById('btn-print-receipt')?.addEventListener('click', () => window.print());
+        document.getElementById('btn-close-receipt')?.addEventListener('click', () => window.close());
+    </script>
 </body>
 
 </html>

@@ -253,27 +253,27 @@
                 <ul class="nav nav-treeview">
                   @can('admin')
                   <li class="nav-item">
-                    <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}">
+                    <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}" @if(request()->routeIs('members.*')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('members.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Member</p>
                     </a>
                   </li>
                   @endcan
                   <li class="nav-item">
-                    <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                    <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" @if(request()->routeIs('categories.*')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('categories.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Categories</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" @if(request()->routeIs('products.*')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('products.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Products</p>
                     </a>
                   </li>
                   @can('admin')
                   <li class="nav-item">
-                    <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" @if(request()->routeIs('users.*')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('users.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>User</p>
                     </a>
@@ -291,13 +291,13 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="{{ route('transactions.order') }}" class="nav-link {{ request()->routeIs('transactions.order') ? 'active' : '' }}">
+                    <a href="{{ route('transactions.order') }}" class="nav-link {{ request()->routeIs('transactions.order') ? 'active' : '' }}" @if(request()->routeIs('transactions.order')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('transactions.order') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Order</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('transactions.history') }}" class="nav-link {{ request()->routeIs('transactions.history') ? 'active' : '' }}">
+                    <a href="{{ route('transactions.history') }}" class="nav-link {{ request()->routeIs('transactions.history') ? 'active' : '' }}" @if(request()->routeIs('transactions.history')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('transactions.history') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>History</p>
                     </a>
@@ -321,7 +321,7 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('reports.products') }}" class="nav-link {{ request()->routeIs('reports.products') ? 'active' : '' }}">
+                    <a href="{{ route('reports.products') }}" class="nav-link {{ request()->routeIs('reports.products') ? 'active' : '' }}" @if(request()->routeIs('reports.products')) aria-current="page" @endif>
                       <i class="nav-icon bi {{ request()->routeIs('reports.products') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Products</p>
                     </a>
