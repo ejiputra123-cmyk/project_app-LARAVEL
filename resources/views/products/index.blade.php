@@ -106,9 +106,25 @@
                                 </button>
                             </div>
 
-                            <!-- Input Pencarian Data -->
-                            <input type="text" id="table-filter" class="form-control mb-3"
-                                placeholder="Cari nama produk...">
+                            <!-- Input Pencarian & Filter Kategori -->
+                            <search>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-8">
+                                        <label for="table-filter" class="visually-hidden">Cari nama produk</label>
+                                        <input type="search" id="table-filter" class="form-control"
+                                            placeholder="Cari nama produk..." autocomplete="off">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="category-filter" class="visually-hidden">Filter kategori</label>
+                                        <select id="category-filter" class="form-select">
+                                            <option value="">Semua Kategori</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </search>
 
                             <!-- Elemen Tempat Tabulator Ditampilkan -->
                             <div id="product-table" aria-label="Products"></div>
@@ -159,6 +175,7 @@
 
             // Isi nilai form modal
             document.getElementById('edit_name').value = product.name;
+            document.getElementById('edit_category_id').value = product.category_id ?? '';
             document.getElementById('edit_price').value = product.price;
             document.getElementById('edit_stock').value = product.stock;
             document.getElementById('edit_description').value = product.description || '';
@@ -171,6 +188,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const categoryCollator = new Intl.Collator('id', { numeric: true, sensitivity: 'base' });
+
             const table = new Tabulator('#product-table', {
                 ajaxURL: "{{ route('products.api') }}",
                 layout: 'fitColumns',
@@ -206,6 +225,26 @@
                     {
                         title: 'Product Name',
                         field: 'name'
+                    },
+                    {
+                        title: 'Category',
+                        field: 'category.name',
+                        sorter: (a, b, aRow, bRow, column, dir) => {
+                            if (!a && !b) return 0;
+                            // Tabulator membalik tanda return saat dir === 'desc', jadi -1 menjaga baris kosong tetap di bawah.
+                            if (!a) return dir === 'asc' ? 1 : -1;
+                            if (!b) return dir === 'asc' ? -1 : 1;
+                            return categoryCollator.compare(a, b);
+                        },
+                        formatter: (cell) => {
+                            const name = cell.getValue();
+                            if (!name) return '-';
+                            const safe = String(name)
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;');
+                            return `<span class="badge text-bg-secondary">${safe}</span>`;
+                        }
                     },
                     {
                         title: 'Price',
@@ -244,9 +283,31 @@
                     'btn', 'btn-sm', 'btn-outline-secondary'));
             });
 
-            document.getElementById('table-filter').addEventListener('input', (e) => {
-                e.target.value ? table.setFilter('name', 'like', e.target.value) : table.clearFilter();
-            });
+            const searchInput = document.getElementById('table-filter');
+            const categoryFilter = document.getElementById('category-filter');
+
+            const applyFilters = () => {
+                const keyword = searchInput.value.trim().toLowerCase();
+                const categoryId = categoryFilter.value;
+
+                if (!keyword && !categoryId) {
+                    table.clearFilter();
+                    return;
+                }
+
+                table.setFilter((data) => {
+                    if (keyword && !(data.name || '').toLowerCase().includes(keyword)) {
+                        return false;
+                    }
+                    if (categoryId && String(data.category_id ?? '') !== categoryId) {
+                        return false;
+                    }
+                    return true;
+                });
+            };
+
+            searchInput.addEventListener('input', applyFilters);
+            categoryFilter.addEventListener('change', applyFilters);
 
             document.getElementById('export-csv').addEventListener('click', () => table.download('csv',
                 'products.csv'));

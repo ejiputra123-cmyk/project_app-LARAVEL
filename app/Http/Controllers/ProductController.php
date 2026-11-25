@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,18 +12,21 @@ class ProductController extends Controller
     // display a listing of the resource.
     public function index()
     {
-        return view('products.index');
+        $categories = Category::orderBy('name')->get(['id', 'name']);
+
+        return view('products.index', compact('categories'));
     }
 
     public function apiData()
     {
-        $products = Product::orderBy('id')->get();
+        $products = Product::with('category:id,name')->orderBy('id')->get();
         return response()->json($products);
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'category_id' => 'nullable|integer|exists:categories,id',
             'name' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
@@ -47,6 +51,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $request->validate([
+            'category_id' => 'nullable|integer|exists:categories,id',
             'name' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
