@@ -28,6 +28,16 @@
                         <input type="password" class="form-control" id="password" name="password" placeholder="Min. 8 karakter" minlength="8" required>
                     </div>
                 </div>
+
+                <div class="mb-3 row">
+                    <label for="role" class="col-sm-3 col-form-label">Role</label>
+                    <div class="col-sm-9">
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="kasir">Kasir</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -59,6 +69,13 @@
                 <div>
                     <label for="edit_password" class="form-label">Password Baru <small class="text-muted">(Kosongkan jika tidak diubah)</small></label>
                     <input type="password" id="edit_password" name="password" class="form-control" placeholder="Min. 8 karakter" minlength="8">
+                </div>
+                <div>
+                    <label for="edit_role" class="form-label">Role</label>
+                    <select id="edit_role" name="role" class="form-select" required>
+                        <option value="kasir">Kasir</option>
+                        <option value="admin">Admin</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer border-0">

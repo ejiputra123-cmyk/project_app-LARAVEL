@@ -224,6 +224,7 @@
             <!--begin::Sidebar Menu-->
             @php
               $isMasterData = request()->routeIs('members.*', 'categories.*', 'products.*', 'users.*');
+              $isTransactions = request()->routeIs('transactions.*');
             @endphp
             <ul
               class="nav sidebar-menu flex-column"
@@ -231,6 +232,7 @@
               data-accordion="false"
               id="navigation"
             >
+              @can('admin')
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-speedometer"></i>
@@ -239,6 +241,7 @@
                   </p>
                 </a>
               </li>
+              @endcan
               <li class="nav-item {{ $isMasterData ? 'menu-open' : '' }}" data-menu-id="master-data">
                 <a href="#" class="nav-link {{ $isMasterData ? 'active' : '' }}">
                   <i class="nav-icon bi bi-box-seam-fill"></i>
@@ -248,12 +251,14 @@
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
+                  @can('admin')
                   <li class="nav-item">
                     <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}">
                       <i class="nav-icon bi {{ request()->routeIs('members.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Member</p>
                     </a>
                   </li>
+                  @endcan
                   <li class="nav-item">
                     <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
                       <i class="nav-icon bi {{ request()->routeIs('categories.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
@@ -266,16 +271,18 @@
                       <p>Products</p>
                     </a>
                   </li>
+                  @can('admin')
                   <li class="nav-item">
                     <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                       <i class="nav-icon bi {{ request()->routeIs('users.*') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>User</p>
                     </a>
                   </li>
+                  @endcan
                 </ul>
               </li>
-              <li class="nav-item" data-menu-id="transactions">
-                <a href="#" class="nav-link">
+              <li class="nav-item {{ $isTransactions ? 'menu-open' : '' }}" data-menu-id="transactions">
+                <a href="#" class="nav-link {{ $isTransactions ? 'active' : '' }}">
                   <i class="nav-icon bi bi-shop"></i>
                   <p>
                     Transactions
@@ -284,19 +291,20 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="./layout/unfixed-sidebar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('transactions.order') }}" class="nav-link {{ request()->routeIs('transactions.order') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('transactions.order') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Order</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./layout/fixed-sidebar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('transactions.history') }}" class="nav-link {{ request()->routeIs('transactions.history') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('transactions.history') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>History</p>
                     </a>
                   </li>
                 </ul>
               </li>
+              @can('admin')
               <li class="nav-item {{ request()->routeIs('reports.*') ? 'menu-open' : '' }}" data-menu-id="reports">
                 <a href="#" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-clipboard"></i>
@@ -326,6 +334,7 @@
                   </li>
                 </ul>
               </li>
+              @endcan
             </ul>
             <!--end::Sidebar Menu-->
 

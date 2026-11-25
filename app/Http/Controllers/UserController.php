@@ -17,7 +17,7 @@ class UserController extends Controller
 
     public function apiData()
     {
-        $users = User::latest()->get(['id', 'name', 'email', 'created_at']);
+        $users = User::latest()->get(['id', 'name', 'email', 'role', 'created_at']);
 
         return response()->json($users);
     }
@@ -28,12 +28,14 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,kasir'],
         ]);
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
         ]);
 
         return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
@@ -47,11 +49,13 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,kasir'],
         ]);
 
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'role' => $validated['role'],
         ];
 
         if (!empty($validated['password'])) {

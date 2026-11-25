@@ -27,10 +27,12 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        // Pendaftar publik selalu kasir; role admin hanya diberikan admin lewat halaman Users.
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => 'kasir',
         ]);
 
         Auth::login($user);

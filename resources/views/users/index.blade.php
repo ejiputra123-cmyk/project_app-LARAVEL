@@ -159,6 +159,7 @@
             document.getElementById('edit_name').value = user.name;
             document.getElementById('edit_email').value = user.email;
             document.getElementById('edit_password').value = '';
+            document.getElementById('edit_role').value = user.role;
 
             document.getElementById('editUserForm').action = `/users/${user.id}`;
 
@@ -188,6 +189,11 @@
                     {
                         title: 'Email',
                         field: 'email'
+                    },
+                    {
+                        title: 'Role',
+                        field: 'role',
+                        width: 120
                     },
                     {
                         title: 'Tanggal Terdaftar',

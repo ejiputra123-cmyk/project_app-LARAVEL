@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Admin ZieMarket',
                 'password' => bcrypt('password'),
+                'role' => 'admin',
             ]
         );
 

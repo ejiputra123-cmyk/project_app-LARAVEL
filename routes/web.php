@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -24,17 +25,30 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::view('reports/products', 'reports.products')->name('reports.products');
-
-    Route::resource('members', MemberController::class);
-    Route::get('api/members', [MemberController::class, 'apiData'])->name('members.api');
-
+    // Admin & kasir
     Route::resource('categories', CategoryController::class);
     Route::get('api/categories', [CategoryController::class, 'apiData'])->name('categories.api');
 
     Route::resource('products', ProductController::class);
     Route::get('api/products', [ProductController::class, 'apiData'])->name('products.api');
 
-    Route::resource('users', UserController::class);
-    Route::get('api/users', [UserController::class, 'apiData'])->name('users.api');
+    Route::get('transactions/order', [TransactionController::class, 'order'])->name('transactions.order');
+    Route::post('transactions/order', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('transactions/history', [TransactionController::class, 'history'])->name('transactions.history');
+    Route::get('api/transactions', [TransactionController::class, 'apiData'])->name('transactions.api');
+    Route::get('transactions/{order}/receipt', [TransactionController::class, 'receipt'])->whereNumber('order')->name('transactions.receipt');
+    Route::get('transactions/{order}', [TransactionController::class, 'show'])->whereNumber('order')->name('transactions.show');
+
+    // Khusus admin
+    Route::middleware('can:admin')->group(function () {
+        Route::patch('transactions/{order}/cancel', [TransactionController::class, 'cancel'])->whereNumber('order')->name('transactions.cancel');
+
+        Route::view('reports/products', 'reports.products')->name('reports.products');
+
+        Route::resource('members', MemberController::class);
+        Route::get('api/members', [MemberController::class, 'apiData'])->name('members.api');
+
+        Route::resource('users', UserController::class);
+        Route::get('api/users', [UserController::class, 'apiData'])->name('users.api');
+    });
 });
