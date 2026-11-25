@@ -24,6 +24,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::view('reports/products', 'reports.products')->name('reports.products');
+
     Route::resource('members', MemberController::class);
     Route::get('api/members', [MemberController::class, 'apiData'])->name('members.api');
 

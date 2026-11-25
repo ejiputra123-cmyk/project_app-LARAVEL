@@ -297,8 +297,8 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-item" data-menu-id="reports">
-                <a href="#" class="nav-link">
+              <li class="nav-item {{ request()->routeIs('reports.*') ? 'menu-open' : '' }}" data-menu-id="reports">
+                <a href="#" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-clipboard"></i>
                   <p>
                     Reports
@@ -313,8 +313,8 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ url('products') }}" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('reports.products') }}" class="nav-link {{ request()->routeIs('reports.products') ? 'active' : '' }}">
+                      <i class="nav-icon bi {{ request()->routeIs('reports.products') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Products</p>
                     </a>
                   </li>
