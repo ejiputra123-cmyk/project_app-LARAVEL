@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:admin')->group(function () {
         Route::patch('transactions/{order}/cancel', [TransactionController::class, 'cancel'])->whereNumber('order')->name('transactions.cancel');
 
-        Route::view('reports/products', 'reports.products')->name('reports.products');
+        Route::get('reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
+        Route::get('api/reports/transactions', [ReportController::class, 'transactionsData'])->name('reports.transactions.api');
+        Route::get('reports/products', [ReportController::class, 'products'])->name('reports.products');
+        Route::get('api/reports/products', [ReportController::class, 'productsData'])->name('reports.products.api');
+        Route::get('reports/members', [ReportController::class, 'members'])->name('reports.members');
+        Route::get('api/reports/members', [ReportController::class, 'membersData'])->name('reports.members.api');
 
         Route::resource('members', MemberController::class);
         Route::get('api/members', [MemberController::class, 'apiData'])->name('members.api');

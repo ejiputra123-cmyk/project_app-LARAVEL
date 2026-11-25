@@ -315,8 +315,8 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="./UI/general.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('reports.transactions') }}" class="nav-link {{ request()->routeIs('reports.transactions') ? 'active' : '' }}" @if(request()->routeIs('reports.transactions')) aria-current="page" @endif>
+                      <i class="nav-icon bi {{ request()->routeIs('reports.transactions') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Transactions</p>
                     </a>
                   </li>
@@ -327,8 +327,8 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./UI/timeline.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ route('reports.members') }}" class="nav-link {{ request()->routeIs('reports.members') ? 'active' : '' }}" @if(request()->routeIs('reports.members')) aria-current="page" @endif>
+                      <i class="nav-icon bi {{ request()->routeIs('reports.members') ? 'bi-circle-fill' : 'bi-circle' }}"></i>
                       <p>Members</p>
                     </a>
                   </li>
